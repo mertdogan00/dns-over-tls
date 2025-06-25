@@ -59,9 +59,33 @@ sudo systemctl restart systemd-resolved
 ```
 
 4. **Ensure `/etc/resolv.conf` is linked correctly:**
-```bash
-sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
-```
+   ```bash
+   sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+   ```
+   > **What does this do?**  
+   This command ensures that `/etc/resolv.conf` is a **symbolic link** (symlink) pointing to the stub resolver managed by `systemd-resolved`.  
+   This way, all applications on your system use the encrypted DNS stub for name resolution.
+
+   > **How to check?**  
+   You can verify the symlink with:
+   ```bash
+   ls -l /etc/resolv.conf
+   ```
+   Output should look like:
+   ```
+   lrwxrwxrwx 1 root root 39 ... /etc/resolv.conf -> ../run/systemd/resolve/stub-resolv.conf
+   ```
+   If you ever want to **revert** and restore your original `resolv.conf`, you can do:
+   ```bash
+   sudo mv /etc/resolv.conf /etc/resolv.conf.systemd-backup
+   sudo cp /etc/resolv.conf.backup /etc/resolv.conf
+   ```
+   > *(If you made a backup as `/etc/resolv.conf.backup` earlier; otherwise, restore from your distro's default or recreate as needed.)*
+
+   > **Note:**  
+   In some desktop environments, the symbolic link might get replaced by GUI network management tools (like NetworkManager).  
+   If you see the file turn back into a regular file after a reboot or network change, you may need to set the symlink again or configure your network manager to stop overwriting `/etc/resolv.conf`.
+
 
 ---
 
